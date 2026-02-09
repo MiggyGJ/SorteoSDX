@@ -1,572 +1,555 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.1">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #000000; -webkit-text-stroke: #ffffff}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; color: #000000; -webkit-text-stroke: #ffffff; min-height: 15.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDX Madrid - Room Draw</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;400;700&display=swap');
+
+        :root {
+            --ucl-blue: #000a2e;
+            --ucl-gold: #c89b3c;
+            --ucl-gold-light: #eec26b;
+            --ucl-accent: #051a5c;
+        }
+
+        body {
+            background: radial-gradient(circle at center, var(--ucl-accent) 0%, var(--ucl-blue) 100%);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .ucl-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(200, 155, 60, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        .star-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .presenter-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 2rem;
+            border: 4px solid var(--ucl-gold);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(200, 155, 60, 0.4);
+        }
+
+        .presenter-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(110%);
+        }
+
+        .speech-text {
+            font-size: 1.25rem;
+            line-height: 1.8;
+            font-style: italic;
+            color: #ddd;
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ball-3d {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d1d1d1 50%, #888 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000a2e;
+            font-weight: bold;
+            box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), inset 8px 8px 20px rgba(255,255,255,0.8), 0 15px 30px rgba(0,0,0,0.5);
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .pot-ball {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
+        }
+
+        .ball-p { background: radial-gradient(circle at 30% 30%, #fff, #bbb); }
+        .ball-r { background: radial-gradient(circle at 30% 30%, var(--ucl-gold-light), var(--ucl-gold)); }
+
+        @keyframes shuffle3d {
+            0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+            25% { transform: translate3d(40px, -20px, 30px) rotate(90deg); }
+            50% { transform: translate3d(-30px, 40px, -20px) rotate(180deg); }
+            75% { transform: translate3d(-40px, -30px, 40px) rotate(270deg); }
+            100% { transform: translate3d(0, 0, 0) rotate(360deg); }
+        }
+
+        .shuffling { animation: shuffle3d 0.8s infinite linear; }
+
+        .bowl-3d {
+            perspective: 800px;
+            background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 80%);
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.05);
+        }
+
+        .reveal-3d { animation: zoomInRotate 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes zoomInRotate {
+            0% { transform: scale(0) rotateX(-90deg) rotateY(-90deg) translateZ(-200px); opacity: 0; }
+            100% { transform: scale(1) rotateX(0) rotateY(0) translateZ(0); opacity: 1; }
+        }
+
+        .btn-ucl, .result-badge-gold {
+            background: linear-gradient(135deg, #c89b3c 0%, #a67c2e 100%);
+            color: #000a2e;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(200, 155, 60, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ucl:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200, 155, 60, 0.6);
+        }
+
+        .result-row {
+            border-left: 4px solid var(--ucl-gold);
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        #ai-commentary, #ai-farewell {
+            min-height: 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+            color: var(--ucl-gold-light);
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px dashed rgba(200, 155, 60, 0.4);
+            border-radius: 0.5rem;
+            background: rgba(0, 10, 46, 0.4);
+            font-weight: 500;
+        }
+
+        /* Estilo de fotos para participantes */
+        .participant-photo-frame {
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--ucl-gold);
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 0.5rem;
+            background: var(--ucl-blue);
+        }
+
+        /* Nuevo estilo para fotos en el resumen (Sin recortar tanto) */
+        .summary-photo-frame {
+            width: 100px;
+            height: 130px;
+            border: 2px solid rgba(200, 155, 60, 0.5);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--ucl-gold); border-radius: 10px; }
+
+        .summary-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(200, 155, 60, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .summary-card:hover {
+            border-color: var(--ucl-gold);
+            transform: translateY(-5px);
+        }
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="es"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;SDX Madrid - Room Draw&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&amp;family=Montserrat:wght@300;400;700&amp;display=swap');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>:root {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--ucl-blue: #000a2e;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--ucl-gold: #c89b3c;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--ucl-gold-light: #eec26b;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>--ucl-accent: #051a5c;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at center, var(--ucl-accent) 0%, var(--ucl-blue) 100%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Montserrat', sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>min-height: 100vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow-x: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.ucl-title {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Cinzel', serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>letter-spacing: 2px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 0 0 15px rgba(200, 155, 60, 0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.glass-panel {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(255, 255, 255, 0.05);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>backdrop-filter: blur(10px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(255, 255, 255, 0.1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.star-background {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: fixed;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>left: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pointer-events: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>z-index: -1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>opacity: 0.3;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.presenter-container {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 250px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 250px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0 auto 2rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 4px solid var(--ucl-gold);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 30px rgba(200, 155, 60, 0.4);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.presenter-img {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>object-fit: cover;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>filter: contrast(110%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.speech-text {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1.25rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>line-height: 1.8;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-style: italic;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #ddd;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>animation: fadeIn 2s ease-in;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes fadeIn {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>from { opacity: 0; transform: translateY(10px); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>to { opacity: 1; transform: translateY(0); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.ball-3d {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 80px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 80px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d1d1d1 50%, #888 100%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #000a2e;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-weight: bold;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), inset 8px 8px 20px rgba(255,255,255,0.8), 0 15px 30px rgba(0,0,0,0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transform-style: preserve-3d;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.pot-ball {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.ball-p { background: radial-gradient(circle at 30% 30%, #fff, #bbb); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.ball-r { background: radial-gradient(circle at 30% 30%, var(--ucl-gold-light), var(--ucl-gold)); }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes shuffle3d {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>0% { transform: translate3d(0, 0, 0) rotate(0deg); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>25% { transform: translate3d(40px, -20px, 30px) rotate(90deg); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>50% { transform: translate3d(-30px, 40px, -20px) rotate(180deg); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>75% { transform: translate3d(-40px, -30px, 40px) rotate(270deg); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>100% { transform: translate3d(0, 0, 0) rotate(360deg); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.shuffling { animation: shuffle3d 0.8s infinite linear; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.bowl-3d {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>perspective: 800px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 80%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid rgba(255,255,255,0.1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: inset 0 0 50px rgba(255,255,255,0.05);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.reveal-3d { animation: zoomInRotate 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes zoomInRotate {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>0% { transform: scale(0) rotateX(-90deg) rotateY(-90deg) translateZ(-200px); opacity: 0; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>100% { transform: scale(1) rotateX(0) rotateY(0) translateZ(0); opacity: 1; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-ucl, .result-badge-gold {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #c89b3c 0%, #a67c2e 100%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #000a2e;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-weight: 700;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-transform: uppercase;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>letter-spacing: 1px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 15px rgba(200, 155, 60, 0.4);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transition: all 0.3s ease;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.btn-ucl:hover:not(:disabled) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 6px 20px rgba(200, 155, 60, 0.6);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.result-row {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-left: 4px solid var(--ucl-gold);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>animation: slideIn 0.5s ease-out forwards;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>@keyframes slideIn {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>from { opacity: 0; transform: translateX(-20px); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>to { opacity: 1; transform: translateX(0); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#ai-commentary, #ai-farewell {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>min-height: 5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-style: italic;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: var(--ucl-gold-light);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px dashed rgba(200, 155, 60, 0.4);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(0, 10, 46, 0.4);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-weight: 500;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Estilo de fotos para participantes */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.participant-photo-frame {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 120px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 120px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 3px solid var(--ucl-gold);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0 auto 0.5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: var(--ucl-blue);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Nuevo estilo para fotos en el resumen (Sin recortar tanto) */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.summary-photo-frame {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: 100px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: 130px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid rgba(200, 155, 60, 0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 0.5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: rgba(0,0,0,0.3);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 10px rgba(0,0,0,0.3);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar { width: 6px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--ucl-gold); border-radius: 10px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.summary-card {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 1px solid rgba(200, 155, 60, 0.3);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transition: transform 0.3s ease;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.summary-card:hover {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-color: var(--ucl-gold);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transform: translateY(-5px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;svg class="star-background" xmlns="http://www.w3.org/2000/svg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;defs&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;pattern id="starPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;path d="M50 5 L55 35 L85 40 L55 45 L50 75 L45 45 L15 40 L45 35 Z" fill="white" opacity="0.2" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/pattern&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/defs&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;rect width="100%" height="100%" fill="url(#starPattern)" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/svg&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="music-container" class="hidden"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;iframe id="player" width="0" height="0" src="" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="container mx-auto px-4 py-8 max-w-4xl"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;header class="text-center mb-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h1 class="ucl-title text-4xl md:text-6xl font-bold text-white mb-2"&gt;SDX MADRID&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;p class="text-ucl-gold font-bold tracking-widest text-sm md:text-lg uppercase"&gt;Official Room Draw 2026&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- PANTALLA DE BIENVENIDA --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="welcome-screen" class="glass-panel p-10 text-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="presenter-container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;img src="assets/img/presentador.jpg"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                     </span>alt="Presentador SDX"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                     </span>class="presenter-img"<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                     </span>id="main-presenter-img"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                     </span>onerror="this.onerror=null; this.src='https://scontent-mad2-1.cdninstagram.com/v/t51.29350-15/459053758_1060397565676103_1944352040345782891_n.heic?stp=dst-jpg_e35_tt6&amp;efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjEwMDB4MTAwMC5zZHIuZjI5MzUwLmRlZmF1bHRfaW1hZ2UuYzIifQ&amp;_nc_ht=scontent-mad2-1.cdninstagram.com&amp;_nc_cat=111&amp;_nc_oc=Q6cZ2QES5Sp9dBnaa7NyYAk1_UE2Ze-YNrgaUVsoEyU5Vx8cO4fWkO5jWY5Ewpu4lZplEOw1kZf0X4EOgfaw8aEio-X6&amp;_nc_ohc=csqh364C9F8Q7kNvwGN0wVI&amp;_nc_gid=CEmt9wA1qY699bKPyTZN0A&amp;edm=AP4sbd4BAAAA&amp;ccb=7-5&amp;ig_cache_key=MzQ1NTYwMzM4NzM5MDM0Mzg3Nw%3D%3D.3-ccb7-5&amp;oh=00_Afuk6S9RA3Lz_DPeiwKzBK4CJgV04Y1D5IIOR-Fwyd5f_Q&amp;oe=698FD766&amp;_nc_sid=7a9f4b';"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-6 max-w-2xl mx-auto"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="speech-text"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>"¡Damas y caballeros… bienvenidos al gran sorteo del &lt;span class="text-ucl-gold font-bold"&gt;SDX CUP 2026&lt;/span&gt;!&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>Hoy se deciden los destinos… las habitaciones donde descansarán los guerreros de esta edición.&lt;br&gt;&lt;br&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="ucl-title text-white"&gt;¡Comienza el sorteo de habitaciones del SDX CUP!"&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="goToSetup()" class="btn-ucl px-10 py-4 rounded-full text-xl mt-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>Entrar al Sorteo</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- SETUP --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="setup-screen" class="hidden glass-panel p-6 md:p-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-2xl font-bold mb-6 text-center"&gt;Configuración del Sorteo&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="space-y-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="bg-blue-950/40 p-4 rounded-lg border border-ucl-gold/30"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;label class="block text-xs font-bold mb-1 text-ucl-gold uppercase"&gt;Gemini API Key&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;input type="password" id="api-key-input" class="w-full bg-blue-900/30 border border-white/20 rounded p-2 text-white text-sm focus:border-ucl-gold focus:outline-none" placeholder="Pega tu clave aquí..."&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;label class="block text-sm font-semibold mb-2 text-gray-300"&gt;Participantes (uno por línea)&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;textarea id="participants-input" rows="8" class="w-full bg-blue-900/30 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:border-ucl-gold" placeholder="Ej: Lucas..."&gt;Lucas</span></p>
-<p class="p1"><span class="s1">Alberto</span></p>
-<p class="p1"><span class="s1">Alfredo</span></p>
-<p class="p1"><span class="s1">Juan</span></p>
-<p class="p1"><span class="s1">Fran</span></p>
-<p class="p1"><span class="s1">Pablo</span></p>
-<p class="p1"><span class="s1">Mario&lt;/textarea&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-sm font-semibold mb-2 text-gray-300"&gt;Número de Habitaciones&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;input type="number" id="rooms-count" class="w-full bg-blue-900/30 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:border-ucl-gold transition-all" value="3" min="1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="flex items-end"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button onclick="startDraw()" class="btn-ucl w-full py-3 rounded-lg"&gt;Configurar Bombos&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p id="setup-error" class="text-red-400 text-sm hidden bg-red-900/20 p-2 rounded border border-red-900/50"&gt;&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-[10px] text-gray-400 text-center italic mt-2"&gt;Nota: Solo se permiten habitaciones dobles o triples. Las individuales están prohibidas por reglamento.&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- DRAW --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="draw-screen" class="hidden"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="ai-commentary"&gt;¡La sala VIP está expectante! El marcador de corazones echa humo...&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="glass-panel p-6 text-center flex flex-col items-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3 class="text-ucl-gold font-bold mb-4 uppercase tracking-tighter"&gt;Bombo Participantes&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="relative w-56 h-56 bowl-3d rounded-full flex items-center justify-center mb-6 overflow-hidden"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div id="pot-participants" class="absolute inset-0"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div id="current-participant" class="h-48 flex flex-col items-center justify-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-2xl font-bold italic text-white/20"&gt;Esperando...&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="glass-panel p-6 text-center flex flex-col items-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3 class="text-ucl-gold font-bold mb-4 uppercase tracking-tighter"&gt;Bombo Habitaciones&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="relative w-56 h-56 bowl-3d rounded-full flex items-center justify-center mb-6 overflow-hidden"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div id="pot-rooms" class="absolute inset-0"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div id="current-room" class="h-48 flex items-center justify-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;span class="text-2xl font-bold italic text-white/20"&gt;Esperando...&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-center mb-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button id="draw-button" onclick="performDraw()" class="btn-ucl px-12 py-4 rounded-full text-xl shadow-2xl"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>¡Extraer Bolas!</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="glass-panel p-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-2"&gt;Resultados en Directo&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div id="results-container" class="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- SUMMARY --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="summary-screen" class="hidden glass-panel p-6 md:p-10"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="text-center mb-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h2 class="ucl-title text-3xl font-bold text-ucl-gold mb-2"&gt;RESUMEN FINAL&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-400"&gt;Distribución SDX CUP 2026&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="ai-farewell" class="mb-8 italic"&gt;Generando discurso de clausura...&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="summary-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="flex justify-center gap-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="resetApp()" class="btn-ucl px-8 py-3 rounded-lg text-sm"&gt;Reiniciar&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="window.print()" class="bg-white/10 px-8 py-3 rounded-lg text-sm font-bold border border-white/20"&gt;Imprimir / PDF&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const participantPhotos = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Lucas": "assets/img/participants/lucas.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Alberto": "assets/img/participants/alberto.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Alfredo": "assets/img/participants/alfredo.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Juan": "assets/img/participants/juan.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Fran": "assets/img/participants/fran.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Pablo": "assets/img/participants/pablo.jpg",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>"Mario": "assets/img/participants/mario.jpg"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let customApiKey = "";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let participants = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let rooms = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let allResults = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let isDrawing = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let musicStarted = false;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const apiKey = "";<span class="Apple-converted-space"> </span></span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function goToSetup() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('welcome-screen').classList.add('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('setup-screen').classList.remove('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!musicStarted) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const player = document.getElementById('player');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const videoId = "UnRG455M8YM";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&amp;loop=1&amp;playlist=${videoId}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>musicStarted = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function resetApp() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>participants = []; rooms = []; allResults = []; isDrawing = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('summary-screen').classList.add('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('welcome-screen').classList.remove('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('results-container').innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('ai-commentary').innerText = "¡La sala VIP está expectante! El marcador de corazones echa humo...";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('current-participant').innerHTML = '&lt;span class="text-2xl font-bold italic text-white/20"&gt;Esperando...&lt;/span&gt;';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('current-room').innerHTML = '&lt;span class="text-2xl font-bold italic text-white/20"&gt;Esperando...&lt;/span&gt;';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const drawBtn = document.getElementById('draw-button');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>drawBtn.innerText = "¡Extraer Bolas!";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>drawBtn.onclick = performDraw;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>drawBtn.disabled = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function getAICommentary(person, room) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const commentaryElement = document.getElementById('ai-commentary');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const keyToUse = customApiKey || apiKey;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!keyToUse) { commentaryElement.innerText = "¡Vaya peligro tiene esta pareja! Id preparando los corazones."; return; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>commentaryElement.innerText = "El comentarista está revisando el marcador de corazones...";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const prompt = `Estás comentando el sorteo SDX CUP 2026 para un grupo de chavales solteros y fiesteros. Tienen un grupo de WhatsApp aparte donde apuntan sus ligues usando emoticonos de corazones ❤️. Acaba de salir "${person}" asignado a la "Habitación ${room}". Genera un comentario corto (1 frase), picante, con mucha guasa y un poco "canalla" sobre esa asignación. Haz referencia directa a los ligues, a sumar corazones en el grupo, a quién va a triunfar o a si esa habitación va a ser un nido de salseo. Responde solo el comentario.`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const systemInstruction = "Eres un comentarista de la Champions League pero con un toque 'canallita' y vacilón. Hablas español de España con jerga actual.";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>method: 'POST',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>headers: { 'Content-Type': 'application/json' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const result = await response.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "¡Prepárate para actualizar el grupo de los corazones!";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>commentaryElement.innerText = `"${text.trim()}"`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} catch (error) { commentaryElement.innerText = "¡Vaya peligro tiene esta pareja! Id preparando los corazones."; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function getAIFarewell() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const farewellElement = document.getElementById('ai-farewell');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const keyToUse = customApiKey || apiKey;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!keyToUse) { farewellElement.innerText = "¡El sorteo ha terminado! Que los dioses del baile y del ligue os acompañen. ¡A por todas, chavales!"; return; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const prompt = `El sorteo oficial de habitaciones para el SDX CUP 2026 ha finalizado. Da un discurso de clausura muy corto (2-3 frases), motivador pero con tu estilo canalla y vacilón. Menciona que la suerte ya está echada, que el marcador de corazones ❤️ es lo único que importa ahora y que Madrid no está preparada para lo que se viene. Usa jerga actual española.`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const systemInstruction = "Eres el comentarista oficial canalla de la SDX CUP. Estilo Champions, pero muy fiestero y directo.";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>method: 'POST',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>headers: { 'Content-Type': 'application/json' },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const result = await response.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "¡Sorteo finalizado! La suerte está echada, ahora solo queda que el marcador de corazones eche humo en Madrid. ¡A disfrutar!";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>farewellElement.innerText = text.trim();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} catch (error) { farewellElement.innerText = "¡Sorteo finalizado! Que empiece el salseo en Madrid. ¡Mucha suerte con esos corazones!"; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function startDraw() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const input = document.getElementById('participants-input').value.trim();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const roomCount = parseInt(document.getElementById('rooms-count').value);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const apiKeyInput = document.getElementById('api-key-input').value.trim();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const errorElement = document.getElementById('setup-error');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!input) { errorElement.innerText = "Introduce nombres."; errorElement.classList.remove('hidden'); return; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>participants = input.split('\n').map(n =&gt; n.trim()).filter(n =&gt; n !== "");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>customApiKey = apiKeyInput;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (participants.length &lt; roomCount * 2) { errorElement.innerText = `⚠️ ERROR: Con ${roomCount} habitaciones, alguien se quedaría solo.`; errorElement.classList.remove('hidden'); return; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (participants.length &gt; roomCount * 3) { errorElement.innerText = `⚠️ ERROR: No caben todos (máx. 3 por hab).`; errorElement.classList.remove('hidden'); return; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>errorElement.classList.add('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>rooms = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= roomCount; i++) { rooms.push(i); rooms.push(i); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let extras = participants.length - (roomCount * 2);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= extras; i++) { rooms.push(i); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>participants = shuffle(participants);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>rooms = shuffle(rooms);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>allResults = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('setup-screen').classList.add('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('draw-screen').classList.remove('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>renderInitialPots();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function shuffle(array) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let currentIndex = array.length, randomIndex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>while (currentIndex != 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>randomIndex = Math.floor(Math.random() * currentIndex);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>currentIndex--;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>[array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return array;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function renderInitialPots() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const pPot = document.getElementById('pot-participants');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rPot = document.getElementById('pot-rooms');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pPot.innerHTML = ''; rPot.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for(let i=0; i&lt;Math.max(participants.length, 10); i++) createPotBall(pPot, 'ball-p');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for(let i=0; i&lt;Math.max(rooms.length, 10); i++) createPotBall(rPot, 'ball-r');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function createPotBall(container, className) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const b = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>b.className = `pot-ball ${className} shuffling`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>b.style.left = Math.random() * 80 + 10 + '%';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>b.style.top = Math.random() * 80 + 10 + '%';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>b.style.animationDelay = Math.random() * 2 + 's';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>container.appendChild(b);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function performDraw() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (isDrawing || participants.length === 0) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>isDrawing = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('draw-button').disabled = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const pPot = document.getElementById('pot-participants');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rPot = document.getElementById('pot-rooms');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const curP = document.getElementById('current-participant');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const curR = document.getElementById('current-room');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>curP.innerHTML = '&lt;div class="ball-3d shuffling"&gt;&lt;/div&gt;';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>await sleep(1500);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const part = participants.pop();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const photoPath = participantPhotos[part] || "https://via.placeholder.com/150?text=" + part;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>curP.innerHTML = `</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="reveal-3d flex flex-col items-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="participant-photo-frame shadow-2xl"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;img src="${photoPath}" alt="${part}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=👤'"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="px-6 py-2 bg-white text-blue-950 font-bold rounded-lg shadow-2xl text-xl border-b-4 border-gray-300"&gt;${part}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (pPot.lastChild) pPot.removeChild(pPot.lastChild);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>await sleep(800);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>curR.innerHTML = '&lt;div class="ball-3d shuffling" style="background: radial-gradient(circle at 30% 30%, var(--ucl-gold-light), var(--ucl-gold), #8a641b)"&gt;&lt;/div&gt;';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>await sleep(1500);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rIdx = Math.floor(Math.random() * rooms.length);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rNum = rooms.splice(rIdx, 1)[0];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>curR.innerHTML = `&lt;div class="reveal-3d px-6 py-2 result-badge-gold rounded-lg shadow-2xl text-2xl uppercase border-b-4 border-[#8a641b]"&gt;HAB ${rNum}&lt;/div&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (rPot.lastChild) rPot.removeChild(rPot.lastChild);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>getAICommentary(part, rNum);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>await sleep(1000);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>allResults.push({ name: part, room: rNum });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const c = document.getElementById('results-container');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const r = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>r.className = "result-row bg-white/10 p-4 rounded flex justify-between items-center mb-2";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>r.innerHTML = `&lt;span class="font-bold text-lg"&gt;${part}&lt;/span&gt;&lt;span class="text-ucl-gold font-bold uppercase"&gt;Habitación ${rNum}&lt;/span&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>c.prepend(r);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (participants.length === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('draw-button').innerText = "Ver Resumen Final";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('draw-button').onclick = showSummary;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>document.getElementById('draw-button').disabled = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else { document.getElementById('draw-button').disabled = false; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>isDrawing = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function showSummary() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('draw-screen').classList.add('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.getElementById('summary-screen').classList.remove('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const grid = document.getElementById('summary-grid');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>grid.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const map = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>allResults.forEach(r =&gt; { if(!map[r.room]) map[r.room] = []; map[r.room].push(r.name); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>Object.keys(map).sort((a,b)=&gt;a-b).forEach(room =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const card = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>card.className = "summary-card p-6 rounded-xl text-center shadow-xl";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let type = map[room].length === 3 ? "TRIPLE" : "DOBLE";</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let membersHtml = map[room].map(m =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const photoPath = participantPhotos[m] || "https://via.placeholder.com/150?text=" + m;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return `</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="flex flex-col items-center group"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="summary-photo-frame border-2 border-ucl-gold/30 group-hover:border-ucl-gold transition-colors"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;img src="${photoPath}" alt="${m}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=👤'"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div class="text-sm font-bold text-white group-hover:text-ucl-gold transition-colors"&gt;${m}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}).join('');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>card.innerHTML = `</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="text-ucl-gold text-[10px] font-bold mb-4 uppercase tracking-widest border-b border-ucl-gold/20 pb-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>HAB ${room} (${type})</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="flex justify-center items-start gap-4 flex-wrap"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>${membersHtml}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>grid.appendChild(card);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>getAIFarewell();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function sleep(ms) { return new Promise(r =&gt; setTimeout(r, ms)); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+    <svg class="star-background" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="starPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                <path d="M50 5 L55 35 L85 40 L55 45 L50 75 L45 45 L15 40 L45 35 Z" fill="white" opacity="0.2" />
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#starPattern)" />
+    </svg>
+
+    <div id="music-container" class="hidden">
+        <iframe id="player" width="0" height="0" src="" frameborder="0" allow="autoplay"></iframe>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-10">
+            <h1 class="ucl-title text-4xl md:text-6xl font-bold text-white mb-2">SDX MADRID</h1>
+            <p class="text-ucl-gold font-bold tracking-widest text-sm md:text-lg uppercase">Official Room Draw 2026</p>
+        </header>
+
+        <!-- PANTALLA DE BIENVENIDA -->
+        <div id="welcome-screen" class="glass-panel p-10 text-center">
+            <div class="presenter-container">
+                <img src="assets/img/presentador.jpg" 
+                     alt="Presentador SDX" 
+                     class="presenter-img" 
+                     id="main-presenter-img"
+                     onerror="this.onerror=null; this.src='https://scontent-mad2-1.cdninstagram.com/v/t51.29350-15/459053758_1060397565676103_1944352040345782891_n.heic?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0uaW1hZ2VfdXJsZ2VuLjEwMDB4MTAwMC5zZHIuZjI5MzUwLmRlZmF1bHRfaW1hZ2UuYzIifQ&_nc_ht=scontent-mad2-1.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2QES5Sp9dBnaa7NyYAk1_UE2Ze-YNrgaUVsoEyU5Vx8cO4fWkO5jWY5Ewpu4lZplEOw1kZf0X4EOgfaw8aEio-X6&_nc_ohc=csqh364C9F8Q7kNvwGN0wVI&_nc_gid=CEmt9wA1qY699bKPyTZN0A&edm=AP4sbd4BAAAA&ccb=7-5&ig_cache_key=MzQ1NTYwMzM4NzM5MDM0Mzg3Nw%3D%3D.3-ccb7-5&oh=00_Afuk6S9RA3Lz_DPeiwKzBK4CJgV04Y1D5IIOR-Fwyd5f_Q&oe=698FD766&_nc_sid=7a9f4b';">
+            </div>
+            <div class="space-y-6 max-w-2xl mx-auto">
+                <p class="speech-text">
+                    "¡Damas y caballeros… bienvenidos al gran sorteo del <span class="text-ucl-gold font-bold">SDX CUP 2026</span>!<br><br>
+                    Hoy se deciden los destinos… las habitaciones donde descansarán los guerreros de esta edición.<br><br>
+                    <span class="ucl-title text-white">¡Comienza el sorteo de habitaciones del SDX CUP!"</span>
+                </p>
+                <button onclick="goToSetup()" class="btn-ucl px-10 py-4 rounded-full text-xl mt-8">
+                    Entrar al Sorteo
+                </button>
+            </div>
+        </div>
+
+        <!-- SETUP -->
+        <div id="setup-screen" class="hidden glass-panel p-6 md:p-10">
+            <h2 class="text-2xl font-bold mb-6 text-center">Configuración del Sorteo</h2>
+            <div class="space-y-6">
+                <div class="bg-blue-950/40 p-4 rounded-lg border border-ucl-gold/30">
+                    <label class="block text-xs font-bold mb-1 text-ucl-gold uppercase">Gemini API Key</label>
+                    <input type="password" id="api-key-input" class="w-full bg-blue-900/30 border border-white/20 rounded p-2 text-white text-sm focus:border-ucl-gold focus:outline-none" placeholder="Pega tu clave aquí...">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Participantes (uno por línea)</label>
+                    <textarea id="participants-input" rows="8" class="w-full bg-blue-900/30 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:border-ucl-gold" placeholder="Ej: Lucas...">Lucas
+Alberto
+Alfredo
+Juan
+Fran
+Pablo
+Mario</textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-300">Número de Habitaciones</label>
+                        <input type="number" id="rooms-count" class="w-full bg-blue-900/30 border border-white/20 rounded-lg p-3 text-white focus:outline-none focus:border-ucl-gold transition-all" value="3" min="1">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="startDraw()" class="btn-ucl w-full py-3 rounded-lg">Configurar Bombos</button>
+                    </div>
+                </div>
+                <p id="setup-error" class="text-red-400 text-sm hidden bg-red-900/20 p-2 rounded border border-red-900/50"></p>
+                <p class="text-[10px] text-gray-400 text-center italic mt-2">Nota: Solo se permiten habitaciones dobles o triples. Las individuales están prohibidas por reglamento.</p>
+            </div>
+        </div>
+
+        <!-- DRAW -->
+        <div id="draw-screen" class="hidden">
+            <div id="ai-commentary">¡La sala VIP está expectante! El marcador de corazones echa humo...</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="glass-panel p-6 text-center flex flex-col items-center">
+                    <h3 class="text-ucl-gold font-bold mb-4 uppercase tracking-tighter">Bombo Participantes</h3>
+                    <div class="relative w-56 h-56 bowl-3d rounded-full flex items-center justify-center mb-6 overflow-hidden">
+                        <div id="pot-participants" class="absolute inset-0"></div>
+                    </div>
+                    <div id="current-participant" class="h-48 flex flex-col items-center justify-center">
+                        <span class="text-2xl font-bold italic text-white/20">Esperando...</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 text-center flex flex-col items-center">
+                    <h3 class="text-ucl-gold font-bold mb-4 uppercase tracking-tighter">Bombo Habitaciones</h3>
+                    <div class="relative w-56 h-56 bowl-3d rounded-full flex items-center justify-center mb-6 overflow-hidden">
+                        <div id="pot-rooms" class="absolute inset-0"></div>
+                    </div>
+                    <div id="current-room" class="h-48 flex items-center justify-center">
+                        <span class="text-2xl font-bold italic text-white/20">Esperando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-10">
+                <button id="draw-button" onclick="performDraw()" class="btn-ucl px-12 py-4 rounded-full text-xl shadow-2xl">
+                    ¡Extraer Bolas!
+                </button>
+            </div>
+
+            <div class="glass-panel p-6">
+                <h3 class="text-xl font-bold mb-4 border-b border-white/10 pb-2">Resultados en Directo</h3>
+                <div id="results-container" class="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"></div>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div id="summary-screen" class="hidden glass-panel p-6 md:p-10">
+            <div class="text-center mb-8">
+                <h2 class="ucl-title text-3xl font-bold text-ucl-gold mb-2">RESUMEN FINAL</h2>
+                <p class="text-gray-400">Distribución SDX CUP 2026</p>
+            </div>
+            
+            <div id="ai-farewell" class="mb-8 italic">Generando discurso de clausura...</div>
+
+            <div id="summary-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10"></div>
+            <div class="flex justify-center gap-4">
+                <button onclick="resetApp()" class="btn-ucl px-8 py-3 rounded-lg text-sm">Reiniciar</button>
+                <button onclick="window.print()" class="bg-white/10 px-8 py-3 rounded-lg text-sm font-bold border border-white/20">Imprimir / PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const participantPhotos = {
+            "Lucas": "assets/img/participants/lucas.jpg",
+            "Alberto": "assets/img/participants/alberto.jpg",
+            "Alfredo": "assets/img/participants/alfredo.jpg",
+            "Juan": "assets/img/participants/juan.jpg",
+            "Fran": "assets/img/participants/fran.jpg",
+            "Pablo": "assets/img/participants/pablo.jpg",
+            "Mario": "assets/img/participants/mario.jpg"
+        };
+
+        let customApiKey = "";
+        let participants = [];
+        let rooms = [];
+        let allResults = [];
+        let isDrawing = false;
+        let musicStarted = false;
+
+        const apiKey = ""; 
+
+        function goToSetup() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            if (!musicStarted) {
+                const player = document.getElementById('player');
+                const videoId = "UnRG455M8YM";
+                player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
+                musicStarted = true;
+            }
+        }
+
+        function resetApp() {
+            participants = []; rooms = []; allResults = []; isDrawing = false;
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('results-container').innerHTML = '';
+            document.getElementById('ai-commentary').innerText = "¡La sala VIP está expectante! El marcador de corazones echa humo...";
+            document.getElementById('current-participant').innerHTML = '<span class="text-2xl font-bold italic text-white/20">Esperando...</span>';
+            document.getElementById('current-room').innerHTML = '<span class="text-2xl font-bold italic text-white/20">Esperando...</span>';
+            const drawBtn = document.getElementById('draw-button');
+            drawBtn.innerText = "¡Extraer Bolas!";
+            drawBtn.onclick = performDraw;
+            drawBtn.disabled = false;
+        }
+
+        async function getAICommentary(person, room) {
+            const commentaryElement = document.getElementById('ai-commentary');
+            const keyToUse = customApiKey || apiKey;
+            if (!keyToUse) { commentaryElement.innerText = "¡Vaya peligro tiene esta pareja! Id preparando los corazones."; return; }
+            commentaryElement.innerText = "El comentarista está revisando el marcador de corazones...";
+            const prompt = `Estás comentando el sorteo SDX CUP 2026 para un grupo de chavales solteros y fiesteros. Tienen un grupo de WhatsApp aparte donde apuntan sus ligues usando emoticonos de corazones ❤️. Acaba de salir "${person}" asignado a la "Habitación ${room}". Genera un comentario corto (1 frase), picante, con mucha guasa y un poco "canalla" sobre esa asignación. Haz referencia directa a los ligues, a sumar corazones en el grupo, a quién va a triunfar o a si esa habitación va a ser un nido de salseo. Responde solo el comentario.`;
+            const systemInstruction = "Eres un comentarista de la Champions League pero con un toque 'canallita' y vacilón. Hablas español de España con jerga actual.";
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })
+                });
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "¡Prepárate para actualizar el grupo de los corazones!";
+                commentaryElement.innerText = `"${text.trim()}"`;
+            } catch (error) { commentaryElement.innerText = "¡Vaya peligro tiene esta pareja! Id preparando los corazones."; }
+        }
+
+        async function getAIFarewell() {
+            const farewellElement = document.getElementById('ai-farewell');
+            const keyToUse = customApiKey || apiKey;
+            if (!keyToUse) { farewellElement.innerText = "¡El sorteo ha terminado! Que los dioses del baile y del ligue os acompañen. ¡A por todas, chavales!"; return; }
+            const prompt = `El sorteo oficial de habitaciones para el SDX CUP 2026 ha finalizado. Da un discurso de clausura muy corto (2-3 frases), motivador pero con tu estilo canalla y vacilón. Menciona que la suerte ya está echada, que el marcador de corazones ❤️ es lo único que importa ahora y que Madrid no está preparada para lo que se viene. Usa jerga actual española.`;
+            const systemInstruction = "Eres el comentarista oficial canalla de la SDX CUP. Estilo Champions, pero muy fiestero y directo.";
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemInstruction }] } })
+                });
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "¡Sorteo finalizado! La suerte está echada, ahora solo queda que el marcador de corazones eche humo en Madrid. ¡A disfrutar!";
+                farewellElement.innerText = text.trim();
+            } catch (error) { farewellElement.innerText = "¡Sorteo finalizado! Que empiece el salseo en Madrid. ¡Mucha suerte con esos corazones!"; }
+        }
+
+        function startDraw() {
+            const input = document.getElementById('participants-input').value.trim();
+            const roomCount = parseInt(document.getElementById('rooms-count').value);
+            const apiKeyInput = document.getElementById('api-key-input').value.trim();
+            const errorElement = document.getElementById('setup-error');
+            if (!input) { errorElement.innerText = "Introduce nombres."; errorElement.classList.remove('hidden'); return; }
+            participants = input.split('\n').map(n => n.trim()).filter(n => n !== "");
+            customApiKey = apiKeyInput;
+            if (participants.length < roomCount * 2) { errorElement.innerText = `⚠️ ERROR: Con ${roomCount} habitaciones, alguien se quedaría solo.`; errorElement.classList.remove('hidden'); return; }
+            if (participants.length > roomCount * 3) { errorElement.innerText = `⚠️ ERROR: No caben todos (máx. 3 por hab).`; errorElement.classList.remove('hidden'); return; }
+            errorElement.classList.add('hidden');
+            rooms = [];
+            for (let i = 1; i <= roomCount; i++) { rooms.push(i); rooms.push(i); }
+            let extras = participants.length - (roomCount * 2);
+            for (let i = 1; i <= extras; i++) { rooms.push(i); }
+            participants = shuffle(participants);
+            rooms = shuffle(rooms);
+            allResults = [];
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('draw-screen').classList.remove('hidden');
+            renderInitialPots();
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function renderInitialPots() {
+            const pPot = document.getElementById('pot-participants');
+            const rPot = document.getElementById('pot-rooms');
+            pPot.innerHTML = ''; rPot.innerHTML = '';
+            for(let i=0; i<Math.max(participants.length, 10); i++) createPotBall(pPot, 'ball-p');
+            for(let i=0; i<Math.max(rooms.length, 10); i++) createPotBall(rPot, 'ball-r');
+        }
+
+        function createPotBall(container, className) {
+            const b = document.createElement('div');
+            b.className = `pot-ball ${className} shuffling`;
+            b.style.left = Math.random() * 80 + 10 + '%';
+            b.style.top = Math.random() * 80 + 10 + '%';
+            b.style.animationDelay = Math.random() * 2 + 's';
+            container.appendChild(b);
+        }
+
+        async function performDraw() {
+            if (isDrawing || participants.length === 0) return;
+            isDrawing = true;
+            document.getElementById('draw-button').disabled = true;
+            const pPot = document.getElementById('pot-participants');
+            const rPot = document.getElementById('pot-rooms');
+            const curP = document.getElementById('current-participant');
+            const curR = document.getElementById('current-room');
+            curP.innerHTML = '<div class="ball-3d shuffling"></div>';
+            await sleep(1500);
+            const part = participants.pop();
+            const photoPath = participantPhotos[part] || "https://via.placeholder.com/150?text=" + part;
+            curP.innerHTML = `
+                <div class="reveal-3d flex flex-col items-center">
+                    <div class="participant-photo-frame shadow-2xl">
+                        <img src="${photoPath}" alt="${part}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=👤'">
+                    </div>
+                    <div class="px-6 py-2 bg-white text-blue-950 font-bold rounded-lg shadow-2xl text-xl border-b-4 border-gray-300">${part}</div>
+                </div>
+            `;
+            if (pPot.lastChild) pPot.removeChild(pPot.lastChild);
+            await sleep(800);
+            curR.innerHTML = '<div class="ball-3d shuffling" style="background: radial-gradient(circle at 30% 30%, var(--ucl-gold-light), var(--ucl-gold), #8a641b)"></div>';
+            await sleep(1500);
+            const rIdx = Math.floor(Math.random() * rooms.length);
+            const rNum = rooms.splice(rIdx, 1)[0];
+            curR.innerHTML = `<div class="reveal-3d px-6 py-2 result-badge-gold rounded-lg shadow-2xl text-2xl uppercase border-b-4 border-[#8a641b]">HAB ${rNum}</div>`;
+            if (rPot.lastChild) rPot.removeChild(rPot.lastChild);
+            getAICommentary(part, rNum);
+            await sleep(1000);
+            allResults.push({ name: part, room: rNum });
+            const c = document.getElementById('results-container');
+            const r = document.createElement('div');
+            r.className = "result-row bg-white/10 p-4 rounded flex justify-between items-center mb-2";
+            r.innerHTML = `<span class="font-bold text-lg">${part}</span><span class="text-ucl-gold font-bold uppercase">Habitación ${rNum}</span>`;
+            c.prepend(r);
+            if (participants.length === 0) {
+                document.getElementById('draw-button').innerText = "Ver Resumen Final";
+                document.getElementById('draw-button').onclick = showSummary;
+                document.getElementById('draw-button').disabled = false;
+            } else { document.getElementById('draw-button').disabled = false; }
+            isDrawing = false;
+        }
+
+        function showSummary() {
+            document.getElementById('draw-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+            const grid = document.getElementById('summary-grid');
+            grid.innerHTML = '';
+            const map = {};
+            allResults.forEach(r => { if(!map[r.room]) map[r.room] = []; map[r.room].push(r.name); });
+            Object.keys(map).sort((a,b)=>a-b).forEach(room => {
+                const card = document.createElement('div');
+                card.className = "summary-card p-6 rounded-xl text-center shadow-xl";
+                let type = map[room].length === 3 ? "TRIPLE" : "DOBLE";
+                
+                let membersHtml = map[room].map(m => {
+                    const photoPath = participantPhotos[m] || "https://via.placeholder.com/150?text=" + m;
+                    return `
+                        <div class="flex flex-col items-center group">
+                            <div class="summary-photo-frame border-2 border-ucl-gold/30 group-hover:border-ucl-gold transition-colors">
+                                <img src="${photoPath}" alt="${m}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150?text=👤'">
+                            </div>
+                            <div class="text-sm font-bold text-white group-hover:text-ucl-gold transition-colors">${m}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                card.innerHTML = `
+                    <div class="text-ucl-gold text-[10px] font-bold mb-4 uppercase tracking-widest border-b border-ucl-gold/20 pb-2">
+                        HAB ${room} (${type})
+                    </div>
+                    <div class="flex justify-center items-start gap-4 flex-wrap">
+                        ${membersHtml}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            getAIFarewell();
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    </script>
 </body>
 </html>
