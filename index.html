@@ -182,11 +182,6 @@
             font-size: 0.9rem;
         }
 
-        @media (min-width: 768px) {
-            #ai-commentary, #ai-farewell { font-size: 1rem; padding: 1rem; }
-        }
-
-        /* Foto del participante ajustable */
         .participant-photo-frame {
             width: 120px;
             height: 160px;
@@ -203,7 +198,6 @@
             .participant-photo-frame { width: 140px; height: 180px; margin-bottom: 0.75rem; }
         }
 
-        /* Foto en el resumen */
         .summary-photo-frame {
             width: 80px;
             height: 105px;
@@ -227,6 +221,40 @@
             border: 1px solid rgba(200, 155, 60, 0.3);
             transition: transform 0.3s ease;
         }
+
+        /* Botón de música */
+        #music-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid var(--ucl-gold);
+            background: rgba(0, 10, 46, 0.8);
+            box-shadow: 0 0 15px rgba(200, 155, 60, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        #music-toggle:hover {
+            transform: scale(1.1);
+            background: var(--ucl-gold);
+        }
+
+        #music-toggle:hover svg {
+            fill: var(--ucl-blue);
+        }
+
+        #music-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--ucl-gold);
+        }
     </style>
 </head>
 <body>
@@ -240,8 +268,15 @@
         <rect width="100%" height="100%" fill="url(#starPattern)" />
     </svg>
 
-    <div id="music-container" class="hidden">
-        <iframe id="player" width="0" height="0" src="" frameborder="0" allow="autoplay"></iframe>
+    <!-- Botón de Control de Música -->
+    <div id="music-toggle" class="hidden" onclick="toggleMusic()">
+        <svg id="music-on-icon" viewBox="0 0 24 24"><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.85 14,18.71V20.77C18.01,19.86 21,16.28 21,12C21,7.72 18.01,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16.02C15.5,15.29 16.5,13.77 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/></svg>
+        <svg id="music-off-icon" class="hidden" viewBox="0 0 24 24"><path d="M12,4L9.91,6.09L12,8.18V4M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73L4.27,3M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18.01,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.48,12.43 16.5,12.22 16.5,12Z"/></svg>
+    </div>
+
+    <!-- Contenedor del Player de YouTube -->
+    <div id="player-container" style="position: absolute; top: -9999px; left: -9999px;">
+        <div id="yt-player"></div>
     </div>
 
     <div class="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
@@ -305,7 +340,6 @@ Mario</textarea>
 
         <!-- DRAW -->
         <div id="draw-screen" class="hidden">
-            <!-- Potes arriba en móvil -->
             <div class="flex md:grid md:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-6">
                 <div class="flex-1 glass-panel p-3 md:p-6 text-center flex flex-col items-center">
                     <h3 class="text-ucl-gold font-bold text-[10px] md:text-sm mb-2 uppercase tracking-tighter">Participantes</h3>
@@ -322,7 +356,6 @@ Mario</textarea>
                 </div>
             </div>
 
-            <!-- Zona focal para animación y comentarista -->
             <div id="draw-focus-area" class="space-y-4">
                 <div id="ai-commentary">¡La sala VIP está expectante! El marcador de corazones echa humo...</div>
                 
@@ -365,6 +398,9 @@ Mario</textarea>
         </div>
     </div>
 
+    <!-- YouTube API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <script>
         const participantPhotos = {
             "Lucas": "assets/img/participants/lucas.jpg",
@@ -381,18 +417,57 @@ Mario</textarea>
         let rooms = [];
         let allResults = [];
         let isDrawing = false;
-        let musicStarted = false;
+        let ytPlayer;
+        let isMusicPlaying = false;
 
-        const apiKey = ""; 
+        // Inicializar Player de YouTube
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '0',
+                width: '0',
+                videoId: 'UnRG455M8YM',
+                playerVars: {
+                    'autoplay': 0,
+                    'loop': 1,
+                    'playlist': 'UnRG455M8YM'
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // El reproductor está listo pero no empezamos música hasta que el usuario entre
+        }
+
+        function toggleMusic() {
+            if (!ytPlayer) return;
+            
+            const onIcon = document.getElementById('music-on-icon');
+            const offIcon = document.getElementById('music-off-icon');
+
+            if (isMusicPlaying) {
+                ytPlayer.pauseVideo();
+                onIcon.classList.add('hidden');
+                offIcon.classList.remove('hidden');
+            } else {
+                ytPlayer.playVideo();
+                onIcon.classList.remove('hidden');
+                offIcon.classList.add('hidden');
+            }
+            isMusicPlaying = !isMusicPlaying;
+        }
 
         function goToSetup() {
             document.getElementById('welcome-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
-            if (!musicStarted) {
-                const player = document.getElementById('player');
-                const videoId = "UnRG455M8YM";
-                player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}`;
-                musicStarted = true;
+            document.getElementById('music-toggle').classList.remove('hidden');
+            
+            // Empezar música automáticamente al entrar
+            if (ytPlayer && !isMusicPlaying) {
+                ytPlayer.playVideo();
+                isMusicPlaying = true;
             }
         }
 
@@ -413,7 +488,7 @@ Mario</textarea>
 
         async function getAICommentary(person, room) {
             const commentaryElement = document.getElementById('ai-commentary');
-            const keyToUse = customApiKey || apiKey;
+            const keyToUse = customApiKey || "";
             if (!keyToUse) { commentaryElement.innerText = "¡Vaya peligro tiene esta pareja! Id preparando los corazones."; return; }
             commentaryElement.innerText = "El comentarista está revisando el marcador de corazones...";
             const prompt = `Estás comentando el sorteo SDX CUP 2026 para un grupo de chavales solteros y fiesteros. Tienen un grupo de WhatsApp aparte donde apuntan sus ligues usando emoticonos de corazones ❤️. Acaba de salir "${person}" asignado a la "Habitación ${room}". Genera un comentario corto (1 frase), picante, con mucha guasa y un poco "canalla" sobre esa asignación. Haz referencia directa a los ligues, a sumar corazones en el grupo, a quién va a triunfar o a si esa habitación va a ser un nido de salseo. Responde solo el comentario.`;
@@ -432,7 +507,7 @@ Mario</textarea>
 
         async function getAIFarewell() {
             const farewellElement = document.getElementById('ai-farewell');
-            const keyToUse = customApiKey || apiKey;
+            const keyToUse = customApiKey || "";
             if (!keyToUse) { farewellElement.innerText = "¡El sorteo ha terminado! Que los dioses del baile y del ligue os acompañen."; return; }
             const prompt = `El sorteo oficial de habitaciones para el SDX CUP 2026 ha finalizado. Da un discurso de clausura muy corto (2-3 frases), motivador pero con tu estilo canalla y vacilón. Menciona que la suerte ya está echada, que el marcador de corazones ❤️ es lo único que importa ahora. Usa jerga actual española.`;
             const systemInstruction = "Eres el comentarista oficial canalla de la SDX CUP. Estilo Champions, pero muy fiestero y directo.";
@@ -503,8 +578,6 @@ Mario</textarea>
             if (isDrawing || participants.length === 0) return;
             isDrawing = true;
             document.getElementById('draw-button').disabled = true;
-
-            // AUTO-SCROLL AL FOCO DEL SORTEO (Crucial para móvil)
             document.getElementById('draw-focus-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             const pPot = document.getElementById('pot-participants');
@@ -566,7 +639,7 @@ Mario</textarea>
                 card.className = "summary-card p-4 md:p-6 rounded-xl text-center shadow-xl";
                 let type = map[room].length === 3 ? "TRIPLE" : "DOBLE";
                 let membersHtml = map[room].map(m => {
-                    const photoPath = participantPhotos[m] || "https://via.placeholder.com/150?text=" + m;
+                    const photoPath = participantPhotos[m] || "assets/img/participants/default.jpg";
                     return `
                         <div class="flex flex-col items-center group">
                             <div class="summary-photo-frame border-2 border-ucl-gold/30 group-hover:border-ucl-gold transition-colors">
